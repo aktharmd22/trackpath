@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\DashboardApiController;
 use App\Http\Controllers\Api\MaterialApiController;
 use App\Http\Controllers\Api\ModuleApiController;
 use App\Http\Controllers\Api\PreferenceApiController;
+use App\Http\Controllers\Api\ProfileApiController;
 use App\Http\Controllers\Api\ProjectApiController;
 use App\Http\Controllers\Api\SubjectApiController;
 use App\Http\Controllers\Api\TaskApiController;
@@ -17,6 +18,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/user', [AuthController::class, 'user']);
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::patch('/preferences/sound', [PreferenceApiController::class, 'updateSound']);
+    Route::patch('/profile', [ProfileApiController::class, 'update']);
+    Route::patch('/profile/password', [ProfileApiController::class, 'updatePassword']);
+    Route::delete('/profile', [ProfileApiController::class, 'destroy']);
 
     Route::get('/dashboard', [DashboardApiController::class, 'index']);
 

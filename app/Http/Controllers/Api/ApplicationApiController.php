@@ -10,6 +10,7 @@ use App\Http\Requests\UpdateApplicationRequest;
 use App\Models\Application;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\URL;
 
 class ApplicationApiController extends Controller
 {
@@ -24,6 +25,7 @@ class ApplicationApiController extends Controller
         return response()->json([
             'applications' => $applications,
             'statuses' => Application::STATUSES,
+            'export_url' => URL::temporarySignedRoute('shared.applications.export', now()->addHours(6)),
         ]);
     }
 

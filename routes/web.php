@@ -75,6 +75,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware('signed')->group(function () {
     Route::get('/shared/materials/{studyMaterial}/preview', [StudyMaterialController::class, 'preview'])->name('shared.materials.preview');
     Route::get('/shared/materials/{studyMaterial}/download', [StudyMaterialController::class, 'download'])->name('shared.materials.download');
+    Route::get('/shared/applications/export', [ApplicationController::class, 'export'])->name('shared.applications.export');
 });
 
 Route::middleware('auth')->group(function () {
