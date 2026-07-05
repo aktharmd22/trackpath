@@ -9,6 +9,7 @@ import { formatDate } from '@/lib/format';
 import MaterialDrawer from '@/Pages/Materials/Partials/MaterialDrawer';
 import { Head, Link, router } from '@inertiajs/react';
 import {
+    BookOpenCheck,
     Download,
     ExternalLink,
     FileText,
@@ -198,6 +199,14 @@ function MaterialCard({ material, onOpen }) {
                         <Pill tone="accent">{material.module.title}</Pill>
                     </Link>
                 )}
+                {material.subject && (
+                    <Link
+                        href={route('exam-prep.show', material.subject.id)}
+                        onClick={action}
+                    >
+                        <Pill tone="solid">{material.subject.title}</Pill>
+                    </Link>
+                )}
                 {material.tags.map((tag) => (
                     <Pill key={tag} tone="muted">
                         <Tag size={10} />
@@ -212,7 +221,14 @@ function MaterialCard({ material, onOpen }) {
     );
 }
 
-export default function Index({ materials, filters, modules, tags, types }) {
+export default function Index({
+    materials,
+    filters,
+    modules,
+    subjects,
+    tags,
+    types,
+}) {
     const [drawerTarget, setDrawerTarget] = useState(null); // 'new' | material id
     const [drawerOpen, setDrawerOpen] = useState(false);
 
@@ -231,15 +247,24 @@ export default function Index({ materials, filters, modules, tags, types }) {
                 title="Materials"
                 description="Files, links, and notes — tagged and tied to modules."
                 actions={
-                    <Button
-                        onClick={() => {
-                            setDrawerTarget('new');
-                            setDrawerOpen(true);
-                        }}
-                    >
-                        <Plus size={16} />
-                        Add material
-                    </Button>
+                    <>
+                        <Link
+                            href={route('exam-prep.index')}
+                            className="inline-flex min-h-tap items-center justify-center gap-2 rounded-field border border-line bg-surface px-4 py-2 text-sm font-semibold text-ink transition hover:bg-card"
+                        >
+                            <BookOpenCheck size={16} />
+                            Exam prep
+                        </Link>
+                        <Button
+                            onClick={() => {
+                                setDrawerTarget('new');
+                                setDrawerOpen(true);
+                            }}
+                        >
+                            <Plus size={16} />
+                            Add material
+                        </Button>
+                    </>
                 }
             />
 
@@ -299,6 +324,7 @@ export default function Index({ materials, filters, modules, tags, types }) {
                 show={drawerOpen}
                 material={drawerMaterial}
                 modules={modules}
+                subjects={subjects}
                 onClose={() => setDrawerOpen(false)}
             />
         </AppShell>

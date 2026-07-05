@@ -9,6 +9,7 @@ use App\Http\Controllers\PreferenceController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProjectController;
 use App\Http\Controllers\StudyMaterialController;
+use App\Http\Controllers\SubjectController;
 use App\Http\Controllers\TaskController;
 use App\Http\Controllers\TimeLogController;
 use Illuminate\Support\Facades\Route;
@@ -38,6 +39,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/applications/{application}/move', [ApplicationController::class, 'move'])->name('applications.move');
     Route::delete('/applications/{application}', [ApplicationController::class, 'destroy'])->name('applications.destroy');
     Route::post('/applications/{application}/events', [ApplicationEventController::class, 'store'])->name('application-events.store');
+
+    // Exam prep (subjects)
+    Route::get('/exam-prep', [SubjectController::class, 'index'])->name('exam-prep.index');
+    Route::get('/exam-prep/{subject}', [SubjectController::class, 'show'])->name('exam-prep.show');
+    Route::post('/subjects', [SubjectController::class, 'store'])->name('subjects.store');
+    Route::patch('/subjects/{subject}', [SubjectController::class, 'update'])->name('subjects.update');
+    Route::delete('/subjects/{subject}', [SubjectController::class, 'destroy'])->name('subjects.destroy');
 
     // Materials
     Route::get('/materials', [StudyMaterialController::class, 'index'])->name('materials.index');

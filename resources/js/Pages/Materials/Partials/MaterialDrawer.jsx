@@ -42,7 +42,7 @@ function TypeSwitch({ value, onChange, disabled }) {
     );
 }
 
-function MaterialForm({ material, modules, onSaved }) {
+function MaterialForm({ material, modules, subjects, defaultSubjectId, onSaved }) {
     const isEdit = Boolean(material);
 
     const { data, setData, processing, progress, errors, reset } = useForm({
@@ -52,6 +52,7 @@ function MaterialForm({ material, modules, onSaved }) {
         url: material?.url ?? '',
         body: material?.body ?? '',
         module_id: material?.module_id ?? '',
+        subject_id: material?.subject_id ?? defaultSubjectId ?? '',
         tags: material?.tags?.join(', ') ?? '',
     });
 
@@ -65,6 +66,7 @@ function MaterialForm({ material, modules, onSaved }) {
             url: data.type === 'link' ? data.url : '',
             body: data.type === 'note' ? data.body : '',
             module_id: data.module_id || null,
+            subject_id: data.subject_id || null,
             tags: data.tags
                 .split(',')
                 .map((tag) => tag.trim().toLowerCase())
@@ -190,6 +192,27 @@ function MaterialForm({ material, modules, onSaved }) {
             </div>
 
             <div>
+                <InputLabel
+                    htmlFor="subject_id"
+                    value="Exam subject (optional)"
+                />
+                <Select
+                    id="subject_id"
+                    value={data.subject_id}
+                    className="mt-1.5 block w-full"
+                    onChange={(e) => setData('subject_id', e.target.value)}
+                >
+                    <option value="">No subject</option>
+                    {(subjects ?? []).map((subject) => (
+                        <option key={subject.id} value={subject.id}>
+                            {subject.title}
+                        </option>
+                    ))}
+                </Select>
+                <InputError message={errors.subject_id} className="mt-2" />
+            </div>
+
+            <div>
                 <InputLabel htmlFor="tags" value="Tags (comma-separated)" />
                 <TextInput
                     id="tags"
@@ -216,6 +239,8 @@ export default function MaterialDrawer({
     show,
     material,
     modules,
+    subjects = [],
+    defaultSubjectId = null,
     onClose,
 }) {
     const [confirmingDelete, setConfirmingDelete] = useState(false);
@@ -242,9 +267,11 @@ export default function MaterialDrawer({
         >
             <div className="space-y-6 pb-4">
                 <MaterialForm
-                    key={material ? material.id : 'new'}
+                    key={material ? material.id : `new-${defaultSubjectId}`}
                     material={material}
                     modules={modules}
+                    subjects={subjects}
+                    defaultSubjectId={defaultSubjectId}
                     onSaved={onClose}
                 />
 

@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\MaterialApiController;
 use App\Http\Controllers\Api\ModuleApiController;
 use App\Http\Controllers\Api\PreferenceApiController;
 use App\Http\Controllers\Api\ProjectApiController;
+use App\Http\Controllers\Api\SubjectApiController;
 use App\Http\Controllers\Api\TaskApiController;
 use Illuminate\Support\Facades\Route;
 
@@ -41,6 +42,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::patch('/applications/{application}/move', [ApplicationApiController::class, 'move']);
     Route::post('/applications/{application}/events', [ApplicationApiController::class, 'storeEvent']);
     Route::delete('/applications/{application}', [ApplicationApiController::class, 'destroy']);
+
+    Route::get('/subjects', [SubjectApiController::class, 'index']);
+    Route::post('/subjects', [SubjectApiController::class, 'store']);
+    Route::get('/subjects/{subject}', [SubjectApiController::class, 'show']);
+    Route::patch('/subjects/{subject}', [SubjectApiController::class, 'update']);
+    Route::delete('/subjects/{subject}', [SubjectApiController::class, 'destroy']);
 
     Route::get('/materials', [MaterialApiController::class, 'index']);
     Route::post('/materials', [MaterialApiController::class, 'store']);

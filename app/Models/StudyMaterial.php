@@ -15,11 +15,16 @@ class StudyMaterial extends Model implements HasMedia
 
     public const TYPES = ['file', 'link', 'note'];
 
-    protected $fillable = ['title', 'type', 'url', 'body', 'module_id'];
+    protected $fillable = ['title', 'type', 'url', 'body', 'module_id', 'subject_id'];
 
     public function module(): BelongsTo
     {
         return $this->belongsTo(Module::class);
+    }
+
+    public function subject(): BelongsTo
+    {
+        return $this->belongsTo(Subject::class);
     }
 
     public function registerMediaCollections(): void

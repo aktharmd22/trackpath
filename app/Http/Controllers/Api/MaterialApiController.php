@@ -7,6 +7,7 @@ use App\Http\Requests\StoreStudyMaterialRequest;
 use App\Http\Requests\UpdateStudyMaterialRequest;
 use App\Models\Module;
 use App\Models\StudyMaterial;
+use App\Models\Subject;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Spatie\Tags\Tag;
@@ -17,9 +18,10 @@ class MaterialApiController extends Controller
     public function index(Request $request): JsonResponse
     {
         $materials = StudyMaterial::query()
-            ->with(['module', 'tags', 'media'])
+            ->with(['module', 'subject', 'tags', 'media'])
             ->when($request->query('type'), fn ($query, $type) => $query->where('type', $type))
             ->when($request->query('module'), fn ($query, $module) => $query->where('module_id', $module))
+            ->when($request->query('subject'), fn ($query, $subject) => $query->where('subject_id', $subject))
             ->when($request->query('tag'), fn ($query, $tag) => $query->withAnyTags([$tag]))
             ->latest()
             ->get()
@@ -28,6 +30,7 @@ class MaterialApiController extends Controller
         return response()->json([
             'materials' => $materials,
             'modules' => Module::orderBy('order')->get(['id', 'title', 'slug']),
+            'subjects' => Subject::orderBy('title')->get(['id', 'title']),
             'tags' => Tag::query()->orderBy('id')->get()->map(fn (Tag $tag) => $tag->name)->unique()->values(),
             'types' => StudyMaterial::TYPES,
         ]);
@@ -90,7 +93,9 @@ class MaterialApiController extends Controller
             'url' => $material->url,
             'body' => $material->body,
             'module_id' => $material->module_id,
+            'subject_id' => $material->subject_id,
             'module' => $material->module?->only(['id', 'title', 'slug']),
+            'subject' => $material->subject?->only(['id', 'title']),
             'tags' => $material->tags->map(fn (Tag $tag) => $tag->name)->values(),
             'file' => $media ? [
                 'name' => $media->file_name,

@@ -6,6 +6,7 @@ use App\Http\Requests\StoreStudyMaterialRequest;
 use App\Http\Requests\UpdateStudyMaterialRequest;
 use App\Models\Module;
 use App\Models\StudyMaterial;
+use App\Models\Subject;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -20,13 +21,15 @@ class StudyMaterialController extends Controller
         $filters = [
             'type' => $request->query('type'),
             'module' => $request->query('module'),
+            'subject' => $request->query('subject'),
             'tag' => $request->query('tag'),
         ];
 
         $materials = StudyMaterial::query()
-            ->with(['module', 'tags', 'media'])
+            ->with(['module', 'subject', 'tags', 'media'])
             ->when($filters['type'], fn ($query, $type) => $query->where('type', $type))
             ->when($filters['module'], fn ($query, $module) => $query->where('module_id', $module))
+            ->when($filters['subject'], fn ($query, $subject) => $query->where('subject_id', $subject))
             ->when($filters['tag'], fn ($query, $tag) => $query->withAnyTags([$tag]))
             ->latest()
             ->get()
@@ -36,6 +39,7 @@ class StudyMaterialController extends Controller
             'materials' => $materials,
             'filters' => $filters,
             'modules' => Module::orderBy('order')->get(['id', 'title', 'slug']),
+            'subjects' => Subject::orderBy('title')->get(['id', 'title']),
             'tags' => Tag::query()->orderBy('id')->get()->map(fn (Tag $tag) => $tag->name)->unique()->values(),
             'types' => StudyMaterial::TYPES,
         ]);
@@ -98,7 +102,9 @@ class StudyMaterialController extends Controller
             'url' => $material->url,
             'body' => $material->body,
             'module_id' => $material->module_id,
+            'subject_id' => $material->subject_id,
             'module' => $material->module?->only(['id', 'title', 'slug']),
+            'subject' => $material->subject?->only(['id', 'title']),
             'tags' => $material->tags->map(fn (Tag $tag) => $tag->name)->values(),
             'file' => $media ? [
                 'name' => $media->file_name,

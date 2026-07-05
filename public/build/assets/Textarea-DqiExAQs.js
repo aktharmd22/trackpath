@@ -1,0 +1,1 @@
+import{r as o,j as s}from"./app-LHXQ1JY4.js";const x=o.forwardRef(function({className:e="",rows:r=4,...t},a){return s.jsx("textarea",{...t,ref:a,rows:r,className:"rounded-field border-line bg-surface text-sm text-ink placeholder:text-muted/70 focus:border-accent focus:ring-accent "+e})});export{x as T};

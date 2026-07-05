@@ -37,6 +37,7 @@ class StoreStudyMaterialRequest extends FormRequest
                 'max:50000',
             ],
             'module_id' => ['nullable', 'integer', 'exists:modules,id'],
+            'subject_id' => ['nullable', 'integer', 'exists:subjects,id'],
             'tags' => ['nullable', 'array', 'max:10'],
             'tags.*' => ['string', 'max:30'],
         ];
