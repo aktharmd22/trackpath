@@ -1,6 +1,8 @@
 import Button from '@/Components/Button';
 import Card from '@/Components/Card';
+import Checkbox from '@/Components/Checkbox';
 import ConfirmDialog from '@/Components/ConfirmDialog';
+import Drawer from '@/Components/Drawer';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import Pill from '@/Components/Pill';
@@ -10,12 +12,12 @@ import Textarea from '@/Components/Textarea';
 import TextInput from '@/Components/TextInput';
 import AppShell from '@/Layouts/AppShell';
 import { formatDate, formatMinutes, MODULE_STATUS, today } from '@/lib/format';
-import { playComplete } from '@/lib/sound';
+import { playComplete, playPop } from '@/lib/sound';
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { ArrowLeft, Check, Clock3, Flag, Trash2 } from 'lucide-react';
+import { ArrowLeft, Check, Clock3, Flag, Pencil, Plus, Trash2 } from 'lucide-react';
 import { useState } from 'react';
 
-function LessonRow({ lesson }) {
+function LessonRow({ lesson, onDelete }) {
     const done = lesson.status === 'done';
 
     const toggle = () => {
@@ -34,38 +36,152 @@ function LessonRow({ lesson }) {
     };
 
     return (
-        <button
-            type="button"
-            onClick={toggle}
-            className="flex min-h-tap w-full items-center gap-3 rounded-field px-2 py-2.5 text-left transition hover:bg-card"
-        >
-            <span
-                className={
-                    'flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition ' +
-                    (done
-                        ? 'border-accent bg-accent text-white'
-                        : 'border-line bg-surface')
-                }
+        <div className="flex items-center gap-1">
+            <button
+                type="button"
+                onClick={toggle}
+                className="flex min-h-tap min-w-0 flex-1 items-center gap-3 rounded-field px-2 py-2.5 text-left transition hover:bg-card"
             >
-                {done && <Check size={14} strokeWidth={3} />}
-            </span>
+                <span
+                    className={
+                        'flex h-6 w-6 shrink-0 items-center justify-center rounded-full border transition ' +
+                        (done
+                            ? 'border-accent bg-accent text-white'
+                            : 'border-line bg-surface')
+                    }
+                >
+                    {done && <Check size={14} strokeWidth={3} />}
+                </span>
 
-            <span
-                className={
-                    'flex-1 text-sm ' +
-                    (done ? 'text-muted line-through' : 'text-ink')
-                }
+                <span
+                    className={
+                        'min-w-0 flex-1 text-sm ' +
+                        (done ? 'text-muted line-through' : 'text-ink')
+                    }
+                >
+                    {lesson.title}
+                </span>
+
+                {lesson.is_checkpoint && (
+                    <Pill tone={done ? 'solid' : 'muted'}>
+                        <Flag size={12} />
+                        Checkpoint
+                    </Pill>
+                )}
+            </button>
+            <button
+                type="button"
+                onClick={() => onDelete(lesson)}
+                aria-label="Delete lesson"
+                className="flex min-h-tap min-w-tap shrink-0 items-center justify-center rounded-field text-muted/60 transition hover:bg-card hover:text-ink"
             >
-                {lesson.title}
-            </span>
+                <Trash2 size={15} />
+            </button>
+        </div>
+    );
+}
 
-            {lesson.is_checkpoint && (
-                <Pill tone={done ? 'solid' : 'muted'}>
-                    <Flag size={12} />
-                    Checkpoint
-                </Pill>
-            )}
-        </button>
+function AddLessonForm({ module }) {
+    const { data, setData, post, processing, errors, reset } = useForm({
+        title: '',
+        is_checkpoint: false,
+    });
+
+    const submit = (e) => {
+        e.preventDefault();
+
+        post(route('lessons.store', module.id), {
+            preserveScroll: true,
+            onSuccess: () => {
+                reset();
+                playPop();
+            },
+        });
+    };
+
+    return (
+        <form onSubmit={submit} className="mt-3 border-t border-line/60 pt-3">
+            <div className="flex gap-2">
+                <TextInput
+                    value={data.title}
+                    required
+                    placeholder="Add a lesson…"
+                    aria-label="Lesson title"
+                    className="block w-full flex-1"
+                    onChange={(e) => setData('title', e.target.value)}
+                />
+                <Button variant="secondary" disabled={processing}>
+                    <Plus size={16} />
+                    Add
+                </Button>
+            </div>
+            <label className="mt-2 flex min-h-tap w-fit cursor-pointer items-center gap-2">
+                <Checkbox
+                    checked={data.is_checkpoint}
+                    onChange={(e) => setData('is_checkpoint', e.target.checked)}
+                />
+                <span className="text-sm text-muted">
+                    This is a checkpoint
+                </span>
+            </label>
+            <InputError message={errors.title} className="mt-1" />
+        </form>
+    );
+}
+
+function EditModuleForm({ module, onSaved, onDelete }) {
+    const { data, setData, patch, processing, errors } = useForm({
+        title: module.title,
+        target_hours: module.target_hours,
+    });
+
+    const submit = (e) => {
+        e.preventDefault();
+
+        patch(route('modules.update', module.id), {
+            preserveScroll: true,
+            onSuccess: onSaved,
+        });
+    };
+
+    return (
+        <div className="space-y-6">
+            <form onSubmit={submit} className="space-y-4">
+                <div>
+                    <InputLabel htmlFor="edit_title" value="Title" />
+                    <TextInput
+                        id="edit_title"
+                        value={data.title}
+                        required
+                        className="mt-1.5 block w-full"
+                        onChange={(e) => setData('title', e.target.value)}
+                    />
+                    <InputError message={errors.title} className="mt-2" />
+                </div>
+
+                <div>
+                    <InputLabel htmlFor="edit_target" value="Target hours" />
+                    <TextInput
+                        id="edit_target"
+                        type="number"
+                        min="0"
+                        max="1000"
+                        value={data.target_hours}
+                        className="mt-1.5 block w-full"
+                        onChange={(e) => setData('target_hours', e.target.value)}
+                    />
+                    <InputError message={errors.target_hours} className="mt-2" />
+                </div>
+
+                <Button className="w-full" disabled={processing}>
+                    {processing ? 'Saving…' : 'Save changes'}
+                </Button>
+            </form>
+
+            <Button variant="danger" className="w-full" onClick={onDelete}>
+                Delete module
+            </Button>
+        </div>
     );
 }
 
@@ -179,6 +295,29 @@ function NotesForm({ module }) {
 export default function Show({ module, statuses }) {
     const [logToDelete, setLogToDelete] = useState(null);
     const [deletingLog, setDeletingLog] = useState(false);
+    const [lessonToDelete, setLessonToDelete] = useState(null);
+    const [deletingLesson, setDeletingLesson] = useState(false);
+    const [editOpen, setEditOpen] = useState(false);
+    const [confirmingModuleDelete, setConfirmingModuleDelete] = useState(false);
+    const [deletingModule, setDeletingModule] = useState(false);
+
+    const deleteLesson = () => {
+        setDeletingLesson(true);
+
+        router.delete(route('lessons.destroy', lessonToDelete.id), {
+            preserveScroll: true,
+            onSuccess: () => setLessonToDelete(null),
+            onFinish: () => setDeletingLesson(false),
+        });
+    };
+
+    const deleteModule = () => {
+        setDeletingModule(true);
+
+        router.delete(route('modules.destroy', module.id), {
+            onFinish: () => setDeletingModule(false),
+        });
+    };
 
     const changeStatus = (e) => {
         router.patch(
@@ -227,13 +366,23 @@ export default function Show({ module, statuses }) {
                     </p>
                 </div>
 
-                <Select value={module.status} onChange={changeStatus}>
-                    {statuses.map((value) => (
-                        <option key={value} value={value}>
-                            {MODULE_STATUS[value].label}
-                        </option>
-                    ))}
-                </Select>
+                <div className="flex items-center gap-2">
+                    <Select value={module.status} onChange={changeStatus}>
+                        {statuses.map((value) => (
+                            <option key={value} value={value}>
+                                {MODULE_STATUS[value].label}
+                            </option>
+                        ))}
+                    </Select>
+                    <Button
+                        variant="secondary"
+                        onClick={() => setEditOpen(true)}
+                        aria-label="Edit module"
+                    >
+                        <Pencil size={15} />
+                        Edit
+                    </Button>
+                </div>
             </div>
 
             <Card className="mb-4 p-5">
@@ -256,9 +405,19 @@ export default function Show({ module, statuses }) {
                     </h2>
                     <div className="-mx-2 divide-y divide-line/60">
                         {module.lessons.map((lesson) => (
-                            <LessonRow key={lesson.id} lesson={lesson} />
+                            <LessonRow
+                                key={lesson.id}
+                                lesson={lesson}
+                                onDelete={setLessonToDelete}
+                            />
                         ))}
+                        {module.lessons.length === 0 && (
+                            <p className="px-2 py-4 text-sm text-muted">
+                                No lessons yet — add the first one below.
+                            </p>
+                        )}
                     </div>
+                    <AddLessonForm module={module} />
                 </Card>
 
                 <div className="space-y-4">
@@ -330,6 +489,40 @@ export default function Show({ module, statuses }) {
                 processing={deletingLog}
                 onConfirm={deleteLog}
                 onClose={() => setLogToDelete(null)}
+            />
+
+            <ConfirmDialog
+                show={Boolean(lessonToDelete)}
+                title="Delete this lesson?"
+                message={
+                    lessonToDelete
+                        ? `“${lessonToDelete.title}” will be removed.`
+                        : ''
+                }
+                processing={deletingLesson}
+                onConfirm={deleteLesson}
+                onClose={() => setLessonToDelete(null)}
+            />
+
+            <Drawer
+                show={editOpen}
+                onClose={() => setEditOpen(false)}
+                title="Edit module"
+            >
+                <EditModuleForm
+                    module={module}
+                    onSaved={() => setEditOpen(false)}
+                    onDelete={() => setConfirmingModuleDelete(true)}
+                />
+            </Drawer>
+
+            <ConfirmDialog
+                show={confirmingModuleDelete}
+                title="Delete this module?"
+                message={`“${module.title}” and all its lessons and time logs will be permanently removed.`}
+                processing={deletingModule}
+                onConfirm={deleteModule}
+                onClose={() => setConfirmingModuleDelete(false)}
             />
         </AppShell>
     );

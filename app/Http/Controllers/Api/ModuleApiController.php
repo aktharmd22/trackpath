@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Controllers\ModuleController;
+use App\Http\Requests\StoreLessonRequest;
+use App\Http\Requests\StoreModuleRequest;
 use App\Http\Requests\StoreTimeLogRequest;
 use App\Http\Requests\UpdateLessonRequest;
 use App\Http\Requests\UpdateModuleRequest;
@@ -75,6 +78,18 @@ class ModuleApiController extends Controller
         ]);
     }
 
+    public function store(StoreModuleRequest $request): JsonResponse
+    {
+        $module = Module::create([
+            ...$request->validated(),
+            'slug' => ModuleController::uniqueSlug($request->validated()['title']),
+            'order' => (int) Module::max('order') + 1,
+            'target_hours' => $request->validated()['target_hours'] ?? 0,
+        ]);
+
+        return response()->json(['id' => $module->id], 201);
+    }
+
     public function update(UpdateModuleRequest $request, Module $module): JsonResponse
     {
         $module->update($request->validated());
@@ -82,23 +97,57 @@ class ModuleApiController extends Controller
         return response()->json(['ok' => true]);
     }
 
+    public function destroy(Module $module): JsonResponse
+    {
+        $module->delete();
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function storeLesson(StoreLessonRequest $request, Module $module): JsonResponse
+    {
+        $lesson = $module->lessons()->create([
+            'title' => $request->validated()['title'],
+            'is_checkpoint' => $request->validated()['is_checkpoint'] ?? false,
+            'order' => (int) $module->lessons()->max('order') + 1,
+        ]);
+
+        $this->syncModuleStatus($module);
+
+        return response()->json(['id' => $lesson->id], 201);
+    }
+
     public function updateLesson(UpdateLessonRequest $request, Lesson $lesson): JsonResponse
     {
         $lesson->update($request->validated());
 
+        $this->syncModuleStatus($lesson->module);
+
+        return response()->json(['ok' => true]);
+    }
+
+    public function destroyLesson(Lesson $lesson): JsonResponse
+    {
         $module = $lesson->module;
+        $lesson->delete();
+
+        $this->syncModuleStatus($module);
+
+        return response()->json(['ok' => true]);
+    }
+
+    private function syncModuleStatus(Module $module): void
+    {
         $done = $module->lessons()->where('status', 'done')->count();
         $total = $module->lessons()->count();
 
         $module->update([
             'status' => match (true) {
-                $done === 0 => 'not_started',
+                $total === 0, $done === 0 => 'not_started',
                 $done === $total => 'done',
                 default => 'in_progress',
             },
         ]);
-
-        return response()->json(['ok' => true]);
     }
 
     public function storeTimeLog(StoreTimeLogRequest $request, Module $module): JsonResponse

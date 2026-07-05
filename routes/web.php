@@ -21,8 +21,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Learning
     Route::get('/learning', [ModuleController::class, 'index'])->name('learning.index');
     Route::get('/learning/{module:slug}', [ModuleController::class, 'show'])->name('learning.show');
+    Route::post('/modules', [ModuleController::class, 'store'])->name('modules.store');
     Route::patch('/modules/{module}', [ModuleController::class, 'update'])->name('modules.update');
+    Route::delete('/modules/{module}', [ModuleController::class, 'destroy'])->name('modules.destroy');
+    Route::post('/modules/{module}/lessons', [LessonController::class, 'store'])->name('lessons.store');
     Route::patch('/lessons/{lesson}', [LessonController::class, 'update'])->name('lessons.update');
+    Route::delete('/lessons/{lesson}', [LessonController::class, 'destroy'])->name('lessons.destroy');
     Route::post('/modules/{module}/time-logs', [TimeLogController::class, 'store'])->name('time-logs.store');
     Route::delete('/time-logs/{timeLog}', [TimeLogController::class, 'destroy'])->name('time-logs.destroy');
 

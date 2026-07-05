@@ -25,9 +25,13 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::delete('/tasks/{task}', [TaskApiController::class, 'destroy']);
 
     Route::get('/modules', [ModuleApiController::class, 'index']);
+    Route::post('/modules', [ModuleApiController::class, 'store']);
     Route::get('/modules/{module}', [ModuleApiController::class, 'show']);
     Route::patch('/modules/{module}', [ModuleApiController::class, 'update']);
+    Route::delete('/modules/{module}', [ModuleApiController::class, 'destroy']);
+    Route::post('/modules/{module}/lessons', [ModuleApiController::class, 'storeLesson']);
     Route::patch('/lessons/{lesson}', [ModuleApiController::class, 'updateLesson']);
+    Route::delete('/lessons/{lesson}', [ModuleApiController::class, 'destroyLesson']);
     Route::post('/modules/{module}/time-logs', [ModuleApiController::class, 'storeTimeLog']);
     Route::delete('/time-logs/{timeLog}', [ModuleApiController::class, 'destroyTimeLog']);
 

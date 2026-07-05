@@ -16,6 +16,7 @@ class UpdateModuleRequest extends FormRequest
     public function rules(): array
     {
         return [
+            'title' => ['sometimes', 'required', 'string', 'max:255'],
             'status' => ['sometimes', Rule::in(Module::STATUSES)],
             'notes' => ['sometimes', 'nullable', 'string', 'max:10000'],
             'target_hours' => ['sometimes', 'integer', 'min:0', 'max:1000'],

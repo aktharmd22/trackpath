@@ -2,9 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreModuleRequest;
 use App\Http\Requests\UpdateModuleRequest;
 use App\Models\Module;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -74,10 +76,43 @@ class ModuleController extends Controller
         ]);
     }
 
+    public function store(StoreModuleRequest $request): RedirectResponse
+    {
+        Module::create([
+            ...$request->validated(),
+            'slug' => self::uniqueSlug($request->validated()['title']),
+            'order' => (int) Module::max('order') + 1,
+            'target_hours' => $request->validated()['target_hours'] ?? 0,
+        ]);
+
+        return back()->with('success', 'Module added.');
+    }
+
     public function update(UpdateModuleRequest $request, Module $module): RedirectResponse
     {
         $module->update($request->validated());
 
         return back();
+    }
+
+    public function destroy(Module $module): RedirectResponse
+    {
+        $module->delete();
+
+        return redirect()->route('learning.index')->with('success', 'Module removed.');
+    }
+
+    public static function uniqueSlug(string $title): string
+    {
+        $base = Str::slug($title) ?: 'module';
+        $slug = $base;
+        $suffix = 2;
+
+        while (Module::where('slug', $slug)->exists()) {
+            $slug = "{$base}-{$suffix}";
+            $suffix++;
+        }
+
+        return $slug;
     }
 }
