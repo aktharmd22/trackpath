@@ -12,6 +12,7 @@ import {
     BookOpenCheck,
     Download,
     ExternalLink,
+    Eye,
     FileText,
     Library,
     Link2,
@@ -147,14 +148,9 @@ function MaterialCard({ material, onOpen }) {
                 </span>
 
                 {material.type === 'file' && material.file && (
-                    <a
-                        href={route('materials.download', material.id)}
-                        onClick={action}
-                        className="flex min-h-tap items-center gap-1.5 rounded-field px-2 text-xs font-semibold text-muted transition hover:bg-card hover:text-ink"
-                    >
-                        <Download size={14} />
+                    <span className="flex items-center text-xs font-semibold text-muted">
                         {material.file.size}
-                    </a>
+                    </span>
                 )}
                 {material.type === 'link' && (
                     <a
@@ -217,6 +213,29 @@ function MaterialCard({ material, onOpen }) {
                     {formatDate(material.created_at)}
                 </span>
             </div>
+
+            {material.type === 'file' && material.file && (
+                <div className="mt-3 grid grid-cols-2 gap-2 border-t border-line/60 pt-3">
+                    <a
+                        href={route('materials.preview', material.id)}
+                        target="_blank"
+                        rel="noreferrer"
+                        onClick={action}
+                        className="flex min-h-tap items-center justify-center gap-1.5 rounded-field border border-line text-xs font-semibold text-ink transition hover:bg-card"
+                    >
+                        <Eye size={14} />
+                        Preview
+                    </a>
+                    <a
+                        href={route('materials.download', material.id)}
+                        onClick={action}
+                        className="flex min-h-tap items-center justify-center gap-1.5 rounded-field bg-accent text-xs font-semibold text-white transition hover:bg-accent-dk"
+                    >
+                        <Download size={14} />
+                        Download
+                    </a>
+                </div>
+            )}
         </Card>
     );
 }

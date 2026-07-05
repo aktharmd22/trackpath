@@ -84,6 +84,19 @@ class StudyMaterialController extends Controller
         return response()->download($media->getPath(), $media->file_name);
     }
 
+    /** Serve the file inline so browsers render PDFs/images instead of downloading. */
+    public function preview(StudyMaterial $studyMaterial): BinaryFileResponse
+    {
+        $media = $studyMaterial->getFirstMedia('file');
+
+        abort_unless($media !== null, 404);
+
+        return response()->file($media->getPath(), [
+            'Content-Type' => $media->mime_type,
+            'Content-Disposition' => 'inline; filename="' . $media->file_name . '"',
+        ]);
+    }
+
     public function destroy(StudyMaterial $studyMaterial): RedirectResponse
     {
         $studyMaterial->delete();

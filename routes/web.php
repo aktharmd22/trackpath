@@ -52,6 +52,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/materials', [StudyMaterialController::class, 'store'])->name('materials.store');
     Route::patch('/materials/{studyMaterial}', [StudyMaterialController::class, 'update'])->name('materials.update');
     Route::get('/materials/{studyMaterial}/download', [StudyMaterialController::class, 'download'])->name('materials.download');
+    Route::get('/materials/{studyMaterial}/preview', [StudyMaterialController::class, 'preview'])->name('materials.preview');
     Route::delete('/materials/{studyMaterial}', [StudyMaterialController::class, 'destroy'])->name('materials.destroy');
 
     // Tasks
@@ -68,6 +69,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/projects', [ProjectController::class, 'store'])->name('projects.store');
     Route::patch('/projects/{project}', [ProjectController::class, 'update'])->name('projects.update');
     Route::delete('/projects/{project}', [ProjectController::class, 'destroy'])->name('projects.destroy');
+});
+
+// Signed URLs for the mobile app — no session, validity comes from the signature.
+Route::middleware('signed')->group(function () {
+    Route::get('/shared/materials/{studyMaterial}/preview', [StudyMaterialController::class, 'preview'])->name('shared.materials.preview');
+    Route::get('/shared/materials/{studyMaterial}/download', [StudyMaterialController::class, 'download'])->name('shared.materials.download');
 });
 
 Route::middleware('auth')->group(function () {

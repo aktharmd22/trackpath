@@ -7,6 +7,7 @@ use App\Http\Requests\StoreSubjectRequest;
 use App\Models\StudyMaterial;
 use App\Models\Subject;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\URL;
 use Spatie\Tags\Tag;
 
 class SubjectApiController extends Controller
@@ -45,6 +46,16 @@ class SubjectApiController extends Controller
                 'file' => ($media = $material->getFirstMedia('file')) ? [
                     'name' => $media->file_name,
                     'size' => $media->human_readable_size,
+                    'preview_url' => URL::temporarySignedRoute(
+                        'shared.materials.preview',
+                        now()->addHours(6),
+                        ['studyMaterial' => $material->id],
+                    ),
+                    'download_url' => URL::temporarySignedRoute(
+                        'shared.materials.download',
+                        now()->addHours(6),
+                        ['studyMaterial' => $material->id],
+                    ),
                 ] : null,
                 'created_at' => $material->created_at->toDateTimeString(),
             ]);

@@ -13,6 +13,7 @@ import {
     BookOpenCheck,
     Download,
     ExternalLink,
+    Eye,
     FileText,
     Link2,
     Pencil,
@@ -168,9 +169,19 @@ export default function Show({ subject, materials, modules, subjects }) {
                                             )}
                                         </div>
                                         <a
-                                            href={route('materials.download', file.id)}
+                                            href={route('materials.preview', file.id)}
+                                            target="_blank"
+                                            rel="noreferrer"
                                             onClick={(e) => e.stopPropagation()}
                                             className="flex min-h-tap items-center gap-1.5 rounded-field border border-line px-3 text-xs font-semibold text-ink transition hover:bg-card"
+                                        >
+                                            <Eye size={14} />
+                                            Preview
+                                        </a>
+                                        <a
+                                            href={route('materials.download', file.id)}
+                                            onClick={(e) => e.stopPropagation()}
+                                            className="flex min-h-tap items-center gap-1.5 rounded-field bg-accent px-3 text-xs font-semibold text-white transition hover:bg-accent-dk"
                                         >
                                             <Download size={14} />
                                             Download

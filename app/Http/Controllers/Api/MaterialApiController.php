@@ -10,6 +10,7 @@ use App\Models\StudyMaterial;
 use App\Models\Subject;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\URL;
 use Spatie\Tags\Tag;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -100,6 +101,16 @@ class MaterialApiController extends Controller
             'file' => $media ? [
                 'name' => $media->file_name,
                 'size' => $media->human_readable_size,
+                'preview_url' => URL::temporarySignedRoute(
+                    'shared.materials.preview',
+                    now()->addHours(6),
+                    ['studyMaterial' => $material->id],
+                ),
+                'download_url' => URL::temporarySignedRoute(
+                    'shared.materials.download',
+                    now()->addHours(6),
+                    ['studyMaterial' => $material->id],
+                ),
             ] : null,
             'created_at' => $material->created_at->toDateTimeString(),
         ];
