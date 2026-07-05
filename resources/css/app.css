@@ -1,0 +1,57 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*
+ * Design tokens. Values are RGB channels so Tailwind opacity modifiers
+ * (e.g. bg-ink/60) work. A future dark mode only needs to redefine these
+ * under a `.dark` (or [data-theme]) selector — no component changes.
+ */
+/* Monochrome palette — black, white, and neutral grays only. */
+:root {
+    --color-ink: 23 23 23; /* #171717 */
+    --color-muted: 115 115 115; /* #737373 */
+    --color-accent: 23 23 23; /* #171717 — primary actions are black */
+    --color-accent-dk: 0 0 0; /* #000000 — hover/active */
+    --color-tint: 240 240 240; /* #f0f0f0 — active nav / accent backgrounds */
+    --color-line: 229 229 229; /* #e5e5e5 */
+    --color-card: 250 250 250; /* #fafafa */
+    --color-green: 23 23 23; /* success reads as solid dark in monochrome */
+    --color-green-tint: 240 240 240;
+    --color-amber: 82 82 82; /* warnings read as mid-gray */
+    --color-amber-tint: 245 245 245;
+    --color-surface: 255 255 255; /* page/card surface */
+}
+
+@layer base {
+    html {
+        -webkit-tap-highlight-color: transparent;
+    }
+
+    body {
+        @apply bg-card font-sans text-ink antialiased;
+    }
+}
+
+@keyframes page-in {
+    from {
+        opacity: 0;
+        transform: translateY(6px);
+    }
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
+@layer utilities {
+    .animate-page-in {
+        animation: page-in 0.25s ease-out both;
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .animate-page-in {
+            animation: none;
+        }
+    }
+}
